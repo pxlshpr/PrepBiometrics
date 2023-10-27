@@ -1,7 +1,7 @@
 import SwiftUI
 import PrepShared
 
-extension BiometricsStore {
+public extension BiometricsStore {
 
     func setWeightFromHealth(
         using unit: BodyMassUnit? = nil,

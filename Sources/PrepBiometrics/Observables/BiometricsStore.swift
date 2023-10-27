@@ -5,7 +5,7 @@ import CoreData
 
 import PrepShared
 
-protocol GenericPrivateStore {
+public protocol GenericPrivateStore {
     static func currentBiometrics() async throws -> Biometrics
     static func performInBackground(
         _ block: @escaping (NSManagedObjectContext) throws -> ()
@@ -13,7 +13,16 @@ protocol GenericPrivateStore {
     static func fetchOrCreateDayEntity(for date: Date, in context: NSManagedObjectContext) -> DayEntity
 }
 
-protocol GenericHealthStore {
+public protocol GenericPlansStore {
+    static func updatePlans(with biometrics: Biometrics) async throws
+}
+
+public protocol GenericHealthStore {
+
+    static func requestPermissions(
+        characteristicTypeIdentifiers: [CharacteristicType],
+        quantityTypes: [QuantityType]
+    ) async throws
 
     static func weight(
         in unit: BodyMassUnit,
@@ -47,13 +56,13 @@ protocol GenericHealthStore {
     ) async throws -> Double
 }
 
-@Observable class BiometricsStore<S: GenericPrivateStore, H: GenericHealthStore> {
+@Observable public class BiometricsStore<S: GenericPrivateStore, H: GenericHealthStore, P: GenericPlansStore> {
 
 //    static let current = BiometricsStore()
-    let isCurrent: Bool
+    public let isCurrent: Bool
     internal let logger = Logger(subsystem: "BiometricsStore", category: "")
 
-    var ignoreChanges: Bool = false
+    public var ignoreChanges: Bool = false
     
     internal var saveBiometricsTask: Task<Void, Error>? = nil
     
@@ -61,22 +70,25 @@ protocol GenericHealthStore {
 
     let privateStore: S.Type
     let healthStore: H.Type
+    let plansStore: P.Type
 
-    var biometrics: Biometrics {
+    public var biometrics: Biometrics {
         didSet {
             guard !ignoreChanges else { return }
             handleChanges(from: oldValue)
         }
     }
 
-    init(
+    public init(
         biometrics: Biometrics? = nil,
         ignoreChanges: Bool = false,
         privateStore: S.Type,
-        healthStore: H.Type
+        healthStore: H.Type,
+        plansStore: P.Type
     ) {
         self.privateStore = privateStore
         self.healthStore = healthStore
+        self.plansStore = plansStore
         self.ignoreChanges = ignoreChanges
         
         if let biometrics {
@@ -89,7 +101,7 @@ protocol GenericHealthStore {
         }
     }
     
-    func loadCurrentBiometrics() {
+    public func loadCurrentBiometrics() {
         Task {
 //            let biometrics = try await PrivateStore.currentBiometrics()
             let biometrics = try await privateStore.currentBiometrics()
@@ -100,7 +112,7 @@ protocol GenericHealthStore {
     }
 }
 
-extension BiometricsStore {
+public extension BiometricsStore {
 
     func updateHealthValues() async throws {
         /// Set the model to ignore changes so that it doesn't redudantly fetch biometrics twice (in `handleChanges`)
@@ -115,7 +127,7 @@ extension BiometricsStore {
 
 //MARK: - Set Units
 
-extension BiometricsStore {
+public extension BiometricsStore {
     func setHeightUnit(_ newValue: HeightUnit, whileEditing type: BiometricType? = nil) {
         
         Task {
@@ -216,7 +228,7 @@ extension BiometricsStore {
 
 //MARK: - Bindings
 
-extension BiometricsStore {
+public extension BiometricsStore {
     
     var restingEnergyUnit: EnergyUnit {
         get { biometrics.energyUnit }
@@ -554,7 +566,7 @@ extension BiometricsStore {
     }
 }
 
-extension BiometricsStore {
+public extension BiometricsStore {
     var activeEnergyInterval: HealthInterval? {
         get { biometrics.activeEnergy?.interval }
         set { }

@@ -3,7 +3,7 @@ import PrepShared
 
 //MARK: - Saving
 
-extension BiometricsStore {
+public extension BiometricsStore {
     func save() async throws {
             
         try await privateStore.performInBackground { context in
@@ -25,7 +25,7 @@ extension BiometricsStore {
 }
 
 //MARK: - Handle Changes
-extension BiometricsStore {
+public extension BiometricsStore {
     
     func handleChanges(from old: Biometrics) {
         guard !old.matches(biometrics) else {
@@ -45,7 +45,7 @@ extension BiometricsStore {
                 try Task.checkCancellation()
                 try await save()
                 try Task.checkCancellation()
-                try await PlansStore.updatePlans(with: biometrics)
+                try await plansStore.updatePlans(with: biometrics)
             } catch is CancellationError {
                 /// Task cancelled
                 logger.debug("Task was cancelled")
@@ -61,7 +61,7 @@ extension BiometricsStore {
         let quantityTypes = biometrics.quantityTypesToSync(from: old)
         let characteristicTypeIdentifiers = biometrics.characteristicTypesToSync(from: old)
         if !quantityTypes.isEmpty || !characteristicTypeIdentifiers.isEmpty {
-            try await HealthStore.requestPermissions(
+            try await healthStore.requestPermissions(
                 characteristicTypeIdentifiers: characteristicTypeIdentifiers,
                 quantityTypes: quantityTypes
             )
