@@ -44,9 +44,6 @@ public extension BiometricsStore {
                 try await handleChanges(from: old)
                 try Task.checkCancellation()
                 try await save()
-                try Task.checkCancellation()
-                
-                try await plansStore.updatePlans(with: biometrics)
             } catch is CancellationError {
                 /// Task cancelled
                 logger.debug("Task was cancelled")

@@ -17,46 +17,7 @@ public protocol GenericPlansStore {
     static func updatePlans(with biometrics: Biometrics) async throws
 }
 
-public protocol GenericHealthStore {
-
-    static func requestPermissions(
-        characteristicTypeIdentifiers: [CharacteristicType],
-        quantityTypes: [QuantityType]
-    ) async throws
-
-    static func weight(
-        in unit: BodyMassUnit,
-        for date: Date
-    ) async throws -> Quantity?
-    
-    static func height(
-        in unit: HeightUnit,
-        for date: Date
-    ) async throws -> Quantity?
-    
-    static func leanBodyMass(
-        in unit: BodyMassUnit,
-        for date: Date
-    ) async throws -> Quantity?
-    
-    static func biologicalSex() async throws -> HKBiologicalSex?
-    
-    static func dateOfBirthComponents() async throws -> DateComponents?
-
-    static func restingEnergy(
-        for interval: HealthInterval,
-        on date: Date,
-        in unit: EnergyUnit
-    ) async throws -> Double
-    
-    static func activeEnergy(
-        for interval: HealthInterval,
-        on date: Date,
-        in unit: EnergyUnit
-    ) async throws -> Double
-}
-
-@Observable public class BiometricsStore<S: GenericPrivateStore, P: GenericPlansStore> {
+@Observable public class BiometricsStore<S: GenericPrivateStore> {
 
 //    static let current = BiometricsStore()
     public let isCurrent: Bool
@@ -69,8 +30,6 @@ public protocol GenericHealthStore {
 //    static internal var updateHealthBiometricsTask: Task<Void, Error>? = nil
 
     let privateStore: S.Type
-//    let healthStore: H.Type
-    let plansStore: P.Type
 
     public var biometrics: Biometrics {
         didSet {
@@ -82,11 +41,9 @@ public protocol GenericHealthStore {
     public init(
         biometrics: Biometrics? = nil,
         ignoreChanges: Bool = false,
-        privateStore: S.Type,
-        plansStore: P.Type
+        privateStore: S.Type
     ) {
         self.privateStore = privateStore
-        self.plansStore = plansStore
         self.ignoreChanges = ignoreChanges
         
         if let biometrics {
