@@ -1,7 +1,7 @@
 import HealthKit
 import PrepShared
 
-extension EnergyUnit {
+public extension EnergyUnit {
     var healthKitUnit: HKUnit {
         switch self {
         case .kcal:

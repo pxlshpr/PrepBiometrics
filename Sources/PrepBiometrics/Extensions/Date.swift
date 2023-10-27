@@ -1,7 +1,7 @@
 import Foundation
 import PrepShared
 
-extension Date {
+public extension Date {
     var calendarDayString: String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy_MM_dd"
@@ -9,7 +9,7 @@ extension Date {
     }
 }
 
-extension Date {
+public extension Date {
     var biometricShortFormat: String {
         let dayString: String
         var timeString = ""
@@ -71,7 +71,7 @@ extension Date {
     }
 }
 
-extension ClosedRange<Date> {
+public extension ClosedRange<Date> {
     var description: String {
         "\(lowerBound.calendarDayString) to \(upperBound.calendarDayString)"
     }
