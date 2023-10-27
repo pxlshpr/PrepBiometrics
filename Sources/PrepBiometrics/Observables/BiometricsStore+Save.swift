@@ -3,26 +3,26 @@ import PrepShared
 
 //MARK: - Saving
 
-public extension BiometricsStore {
-    func save() async throws {
-            
-        try await privateStore.performInBackground { context in
-            /// Fetch the date to save against. Use the current date if this is the current biometrics in case the date has passed over to the next.
-            let date = self.isCurrent ? Date.now : self.biometrics.date
-            let dayEntity = self.privateStore.fetchOrCreateDayEntity(for: date, in: context)
-            dayEntity.biometrics = self.biometrics
-        }
-        
-        try Task.checkCancellation()
-
-        await MainActor.run {
-            post(.didSaveBiometrics, [
-                .isCurrentBiometrics: self.isCurrent,
-                .biometrics: self.biometrics
-            ])
-        }
-    }
-}
+//public extension BiometricsStore {
+//    func save() async throws {
+//            
+//        try await privateStore.performInBackground { context in
+//            /// Fetch the date to save against. Use the current date if this is the current biometrics in case the date has passed over to the next.
+//            let date = self.isCurrent ? Date.now : self.biometrics.date
+//            let dayEntity = self.privateStore.fetchOrCreateDayEntity(for: date, in: context)
+//            dayEntity.biometrics = self.biometrics
+//        }
+//        
+//        try Task.checkCancellation()
+//
+//        await MainActor.run {
+//            post(.didSaveBiometrics, [
+//                .isCurrentBiometrics: self.isCurrent,
+//                .biometrics: self.biometrics
+//            ])
+//        }
+//    }
+//}
 
 //MARK: - Handle Changes
 public extension BiometricsStore {
@@ -43,7 +43,7 @@ public extension BiometricsStore {
             do {
                 try await handleChanges(from: old)
                 try Task.checkCancellation()
-                try await save()
+                try await saveHandler(biometrics, isCurrent)
             } catch is CancellationError {
                 /// Task cancelled
                 logger.debug("Task was cancelled")

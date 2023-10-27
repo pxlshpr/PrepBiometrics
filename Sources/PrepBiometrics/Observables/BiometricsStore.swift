@@ -5,15 +5,15 @@ import CoreData
 
 import PrepShared
 
-public protocol GenericPrivateStore {
-    static func currentBiometrics() async throws -> Biometrics
-    static func performInBackground(
-        _ block: @escaping (NSManagedObjectContext) throws -> ()
-    ) async throws
-    static func fetchOrCreateDayEntity(for date: Date, in context: NSManagedObjectContext) -> DayEntity
-}
+//public protocol GenericPrivateStore {
+//    static func currentBiometrics() async throws -> Biometrics
+//    static func performInBackground(
+//        _ block: @escaping (NSManagedObjectContext) throws -> ()
+//    ) async throws
+//    static func fetchOrCreateDayEntity(for date: Date, in context: NSManagedObjectContext) -> DayEntity
+//}
 
-@Observable public class BiometricsStore<S: GenericPrivateStore> {
+@Observable public class BiometricsStore {
 
 //    static let current = BiometricsStore()
     public let isCurrent: Bool
@@ -25,8 +25,11 @@ public protocol GenericPrivateStore {
     
 //    static internal var updateHealthBiometricsTask: Task<Void, Error>? = nil
 
-    let privateStore: S.Type
-
+//    let privateStore: S.Type
+    
+    var currentBiometricsHandler: (() async throws -> Biometrics)? = nil
+    var saveHandler: ((Biometrics, Bool) async throws -> ())
+    
     public var biometrics: Biometrics {
         didSet {
             guard !ignoreChanges else { return }
@@ -34,28 +37,33 @@ public protocol GenericPrivateStore {
         }
     }
 
+    /// Current Biometrics
     public init(
-        biometrics: Biometrics? = nil,
-        ignoreChanges: Bool = false,
-        privateStore: S.Type
+        currentBiometricsHandler: (@escaping () async throws -> Biometrics),
+        saveHandler: (@escaping (Biometrics, Bool) async throws -> ())
     ) {
-        self.privateStore = privateStore
-        self.ignoreChanges = ignoreChanges
-        
-        if let biometrics {
-            self.biometrics = biometrics
-            self.isCurrent = false
-        } else {
-            self.biometrics = Biometrics()
-            self.isCurrent = true
-            loadCurrentBiometrics()
-        }
+        self.currentBiometricsHandler = currentBiometricsHandler
+        self.saveHandler = saveHandler
+        self.biometrics = Biometrics()
+        self.isCurrent = true
+        loadCurrentBiometrics(currentBiometricsHandler)
     }
     
-    public func loadCurrentBiometrics() {
+    /// Past Biometrics
+    public init(
+        biometrics: Biometrics,
+        saveHandler: (@escaping (Biometrics, Bool) async throws -> ())
+    ) {
+        self.currentBiometricsHandler = nil
+        self.saveHandler = saveHandler
+        self.biometrics = biometrics
+        self.isCurrent = false
+    }
+
+    public func loadCurrentBiometrics(_ currentBiometricsHandler: (() async throws -> Biometrics)? = nil) {
+        guard let currentBiometricsHandler else { return }
         Task {
-//            let biometrics = try await PrivateStore.currentBiometrics()
-            let biometrics = try await privateStore.currentBiometrics()
+            let biometrics = try await currentBiometricsHandler()
             await MainActor.run {
                 self.biometrics = biometrics
             }
