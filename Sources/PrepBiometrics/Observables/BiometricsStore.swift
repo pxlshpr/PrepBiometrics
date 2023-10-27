@@ -56,7 +56,7 @@ public protocol GenericHealthStore {
     ) async throws -> Double
 }
 
-@Observable public class BiometricsStore<S: GenericPrivateStore, H: GenericHealthStore, P: GenericPlansStore> {
+@Observable public class BiometricsStore<S: GenericPrivateStore, P: GenericPlansStore> {
 
 //    static let current = BiometricsStore()
     public let isCurrent: Bool
@@ -69,7 +69,7 @@ public protocol GenericHealthStore {
 //    static internal var updateHealthBiometricsTask: Task<Void, Error>? = nil
 
     let privateStore: S.Type
-    let healthStore: H.Type
+//    let healthStore: H.Type
     let plansStore: P.Type
 
     public var biometrics: Biometrics {
@@ -83,11 +83,9 @@ public protocol GenericHealthStore {
         biometrics: Biometrics? = nil,
         ignoreChanges: Bool = false,
         privateStore: S.Type,
-        healthStore: H.Type,
         plansStore: P.Type
     ) {
         self.privateStore = privateStore
-        self.healthStore = healthStore
         self.plansStore = plansStore
         self.ignoreChanges = ignoreChanges
         

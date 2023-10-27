@@ -45,6 +45,7 @@ public extension BiometricsStore {
                 try Task.checkCancellation()
                 try await save()
                 try Task.checkCancellation()
+                
                 try await plansStore.updatePlans(with: biometrics)
             } catch is CancellationError {
                 /// Task cancelled
@@ -61,7 +62,7 @@ public extension BiometricsStore {
         let quantityTypes = biometrics.quantityTypesToSync(from: old)
         let characteristicTypeIdentifiers = biometrics.characteristicTypesToSync(from: old)
         if !quantityTypes.isEmpty || !characteristicTypeIdentifiers.isEmpty {
-            try await healthStore.requestPermissions(
+            try await HealthStore.requestPermissions(
                 characteristicTypeIdentifiers: characteristicTypeIdentifiers,
                 quantityTypes: quantityTypes
             )

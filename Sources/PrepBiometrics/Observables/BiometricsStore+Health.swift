@@ -8,7 +8,7 @@ public extension BiometricsStore {
         preservingExistingValue: Bool = false
     ) async throws {
         
-        let quantity = try await healthStore.weight(
+        let quantity = try await HealthStore.weight(
             in: unit ?? biometrics.bodyMassUnit,
             for: biometrics.date
         )
@@ -29,7 +29,7 @@ public extension BiometricsStore {
         preservingExistingValue: Bool = false
     ) async throws {
         
-        let quantity = try await healthStore.height(
+        let quantity = try await HealthStore.height(
             in: unit ?? biometrics.heightUnit,
             for: biometrics.date
         )
@@ -50,7 +50,7 @@ public extension BiometricsStore {
         preservingExistingValue: Bool = false
     ) async throws {
         
-        let quantity = try await healthStore.leanBodyMass(
+        let quantity = try await HealthStore.leanBodyMass(
             in: unit ?? biometrics.bodyMassUnit,
             for: biometrics.date
         )
@@ -70,7 +70,7 @@ public extension BiometricsStore {
         preservingExistingValue: Bool = false
     ) async throws {
         
-        let sex = try await healthStore.biologicalSex()
+        let sex = try await HealthStore.biologicalSex()
         
         if preservingExistingValue { guard sex != nil else { return } }
 
@@ -87,7 +87,7 @@ public extension BiometricsStore {
         preservingExistingValue: Bool = false
     ) async throws {
         
-        let components = try await healthStore.dateOfBirthComponents()
+        let components = try await HealthStore.dateOfBirthComponents()
         
         if preservingExistingValue { guard components != nil else { return } }
 
@@ -109,7 +109,7 @@ public extension BiometricsStore {
             return
         }
 
-        let value = try await healthStore.restingEnergy(
+        let value = try await HealthStore.restingEnergy(
             for: interval,
             on: biometrics.date,
             in: energyUnit ?? biometrics.energyUnit
@@ -133,7 +133,7 @@ public extension BiometricsStore {
             return
         }
         
-        let value = try await healthStore.activeEnergy(
+        let value = try await HealthStore.activeEnergy(
             for: interval,
             on: biometrics.date,
             in: energyUnit ?? biometrics.energyUnit
