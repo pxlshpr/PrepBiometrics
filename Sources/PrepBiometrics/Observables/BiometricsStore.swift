@@ -5,27 +5,15 @@ import CoreData
 
 import PrepShared
 
-//public protocol GenericPrivateStore {
-//    static func currentBiometrics() async throws -> Biometrics
-//    static func performInBackground(
-//        _ block: @escaping (NSManagedObjectContext) throws -> ()
-//    ) async throws
-//    static func fetchOrCreateDayEntity(for date: Date, in context: NSManagedObjectContext) -> DayEntity
-//}
-
 @Observable public class BiometricsStore {
 
-//    static let current = BiometricsStore()
     public let isCurrent: Bool
-    internal let logger = Logger(subsystem: "BiometricsStore", category: "")
-
     public var ignoreChanges: Bool = false
     
-    internal var saveBiometricsTask: Task<Void, Error>? = nil
-    
-//    static internal var updateHealthBiometricsTask: Task<Void, Error>? = nil
+    public static var updateHealthBiometricsTask: Task<Void, Error>? = nil
 
-//    let privateStore: S.Type
+    internal let logger = Logger(subsystem: "BiometricsStore", category: "")
+    internal var saveBiometricsTask: Task<Void, Error>? = nil
     
     var currentBiometricsHandler: (() async throws -> Biometrics)? = nil
     var saveHandler: ((Biometrics, Bool) async throws -> ())
