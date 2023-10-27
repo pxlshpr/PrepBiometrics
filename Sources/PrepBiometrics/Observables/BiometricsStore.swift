@@ -13,10 +13,6 @@ public protocol GenericPrivateStore {
     static func fetchOrCreateDayEntity(for date: Date, in context: NSManagedObjectContext) -> DayEntity
 }
 
-public protocol GenericPlansStore {
-    static func updatePlans(with biometrics: Biometrics) async throws
-}
-
 @Observable public class BiometricsStore<S: GenericPrivateStore> {
 
 //    static let current = BiometricsStore()
