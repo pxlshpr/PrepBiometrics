@@ -11,8 +11,8 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
 
 @Observable public class SettingsStore {
     
-//    static let shared = SettingsStore()
-//    static var energyUnit: EnergyUnit { shared.energyUnit }
+    public static let shared = SettingsStore()
+    public static var energyUnit: EnergyUnit { shared.energyUnit }
 
     public var settings: Settings = .default {
         didSet {
@@ -20,12 +20,12 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
         }
     }
 
-    var fetchHandler: SettingsFetchHandler
-    var saveHandler: SettingsSaveHandler
+    var fetchHandler: SettingsFetchHandler?
+    var saveHandler: SettingsSaveHandler?
 
     public init(
-        fetchHandler: @escaping SettingsFetchHandler,
-        saveHandler: @escaping SettingsSaveHandler
+        fetchHandler: SettingsFetchHandler? = nil,
+        saveHandler: SettingsSaveHandler? = nil
     ) {
         self.fetchHandler = fetchHandler
         self.saveHandler = saveHandler
@@ -33,6 +33,7 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
     }
     
     func fetchSettings() {
+        guard let fetchHandler else { return }
         Task {
 //            let settings = try await Self.fetchOrCreateSettings()
             let settings = try await fetchHandler()
@@ -101,8 +102,9 @@ public extension SettingsStore {
 public extension SettingsStore {
     
     func save() {
+        guard let saveHandler else { return }
         Task.detached(priority: .background) {
-            try await self.saveHandler(self.settings)
+            try await saveHandler(self.settings)
 //            try await PrivateStore.saveSettings(self.settings)
         }
     }
@@ -110,15 +112,15 @@ public extension SettingsStore {
 
 import HealthKit
 
-//extension SettingsStore {
-//    static func unit(for type: QuantityType) -> HKUnit {
-//        switch type {
-//        case .weight, .leanBodyMass:
-//            shared.settings.bodyMassUnit.healthKitUnit
-//        case .height:
-//            shared.settings.heightUnit.healthKitUnit
-//        case .restingEnergy, .activeEnergy:
-//            shared.settings.energyUnit.healthKitUnit
-//        }
-//    }
-//}
+extension SettingsStore {
+    static func unit(for type: QuantityType) -> HKUnit {
+        switch type {
+        case .weight, .leanBodyMass:
+            shared.settings.bodyMassUnit.healthKitUnit
+        case .height:
+            shared.settings.heightUnit.healthKitUnit
+        case .restingEnergy, .activeEnergy:
+            shared.settings.energyUnit.healthKitUnit
+        }
+    }
+}
