@@ -25,10 +25,6 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
 
     public init() { }
 
-//    static func fetchOrCreateSettings() async throws -> Settings {
-//        try await PrivateStore.fetchOrCreateSettings()
-//    }
-    
     func settingsDidChange(from old: Settings) {
         if old != settings {
             save()
@@ -38,27 +34,43 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
 
 public extension SettingsStore {
     
+    static func configure(
+        fetchHandler: @escaping SettingsFetchHandler,
+        saveHandler: @escaping SettingsSaveHandler
+    ) {
+        shared.configure(fetchHandler: fetchHandler, saveHandler: saveHandler)
+    }
+    
+    static func save() {
+        shared.save()
+    }
+    
+    static func fetch() {
+        shared.fetch()
+    }
+}
+
+extension SettingsStore {
+    
     func configure(
-        fetchHandler: SettingsFetchHandler? = nil,
-        saveHandler: SettingsSaveHandler? = nil
+        fetchHandler: @escaping SettingsFetchHandler,
+        saveHandler: @escaping SettingsSaveHandler
     ) {
         self.fetchHandler = fetchHandler
         self.saveHandler = saveHandler
-        fetchSettings()
+        fetch()
     }
 
     func save() {
         guard let saveHandler else { return }
         Task.detached(priority: .background) {
             try await saveHandler(self.settings)
-//            try await PrivateStore.saveSettings(self.settings)
         }
     }
     
-    func fetchSettings() {
+    func fetch() {
         guard let fetchHandler else { return }
         Task {
-//            let settings = try await Self.fetchOrCreateSettings()
             let settings = try await fetchHandler()
             await MainActor.run {
                 self.settings = settings
