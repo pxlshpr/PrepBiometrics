@@ -20,18 +20,11 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
         }
     }
 
-    var fetchHandler: SettingsFetchHandler?
-    var saveHandler: SettingsSaveHandler?
+    var fetchHandler: SettingsFetchHandler? = nil
+    var saveHandler: SettingsSaveHandler? = nil
 
-    public init(
-        fetchHandler: SettingsFetchHandler? = nil,
-        saveHandler: SettingsSaveHandler? = nil
-    ) {
-        self.fetchHandler = fetchHandler
-        self.saveHandler = saveHandler
-        fetchSettings()
-    }
-    
+    public init() { }
+
 //    static func fetchOrCreateSettings() async throws -> Settings {
 //        try await PrivateStore.fetchOrCreateSettings()
 //    }
@@ -39,6 +32,37 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
     func settingsDidChange(from old: Settings) {
         if old != settings {
             save()
+        }
+    }
+}
+
+public extension SettingsStore {
+    
+    func configure(
+        fetchHandler: SettingsFetchHandler? = nil,
+        saveHandler: SettingsSaveHandler? = nil
+    ) {
+        self.fetchHandler = fetchHandler
+        self.saveHandler = saveHandler
+        fetchSettings()
+    }
+
+    func save() {
+        guard let saveHandler else { return }
+        Task.detached(priority: .background) {
+            try await saveHandler(self.settings)
+//            try await PrivateStore.saveSettings(self.settings)
+        }
+    }
+    
+    func fetchSettings() {
+        guard let fetchHandler else { return }
+        Task {
+//            let settings = try await Self.fetchOrCreateSettings()
+            let settings = try await fetchHandler()
+            await MainActor.run {
+                self.settings = settings
+            }
         }
     }
 }
@@ -83,29 +107,6 @@ public extension SettingsStore {
         get { settings.bodyMassUnit }
         set {
             settings.bodyMassUnit = newValue
-        }
-    }
-}
-
-
-public extension SettingsStore {
-    
-    func save() {
-        guard let saveHandler else { return }
-        Task.detached(priority: .background) {
-            try await saveHandler(self.settings)
-//            try await PrivateStore.saveSettings(self.settings)
-        }
-    }
-    
-    func fetchSettings() {
-        guard let fetchHandler else { return }
-        Task {
-//            let settings = try await Self.fetchOrCreateSettings()
-            let settings = try await fetchHandler()
-            await MainActor.run {
-                self.settings = settings
-            }
         }
     }
 }
