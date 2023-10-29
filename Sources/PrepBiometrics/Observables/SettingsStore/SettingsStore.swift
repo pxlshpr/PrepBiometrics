@@ -14,7 +14,7 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
 //    static let shared = SettingsStore()
 //    static var energyUnit: EnergyUnit { shared.energyUnit }
 
-    var settings: Settings = .default {
+    public var settings: Settings = .default {
         didSet {
             settingsDidChange(from: oldValue)
         }
