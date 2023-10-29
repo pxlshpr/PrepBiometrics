@@ -97,11 +97,7 @@ public extension SettingsStore {
 //            try await PrivateStore.saveSettings(self.settings)
         }
     }
-}
-
-import HealthKit
-
-public extension SettingsStore {
+    
     func fetchSettings() {
         guard let fetchHandler else { return }
         Task {
@@ -112,6 +108,11 @@ public extension SettingsStore {
             }
         }
     }
+}
+
+import HealthKit
+
+public extension SettingsStore {
     
     static func unit(for type: QuantityType) -> HKUnit {
         switch type {
