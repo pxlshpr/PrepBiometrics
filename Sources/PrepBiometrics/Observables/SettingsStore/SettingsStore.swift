@@ -32,17 +32,6 @@ public typealias SettingsSaveHandler = ((Settings) async throws -> ())
         fetchSettings()
     }
     
-    func fetchSettings() {
-        guard let fetchHandler else { return }
-        Task {
-//            let settings = try await Self.fetchOrCreateSettings()
-            let settings = try await fetchHandler()
-            await MainActor.run {
-                self.settings = settings
-            }
-        }
-    }
-    
 //    static func fetchOrCreateSettings() async throws -> Settings {
 //        try await PrivateStore.fetchOrCreateSettings()
 //    }
@@ -112,7 +101,18 @@ public extension SettingsStore {
 
 import HealthKit
 
-extension SettingsStore {
+public extension SettingsStore {
+    func fetchSettings() {
+        guard let fetchHandler else { return }
+        Task {
+//            let settings = try await Self.fetchOrCreateSettings()
+            let settings = try await fetchHandler()
+            await MainActor.run {
+                self.settings = settings
+            }
+        }
+    }
+    
     static func unit(for type: QuantityType) -> HKUnit {
         switch type {
         case .weight, .leanBodyMass:
