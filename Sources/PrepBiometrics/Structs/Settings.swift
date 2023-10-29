@@ -14,6 +14,8 @@ public struct Settings: Codable, Hashable {
     public var showRDAGoals: Bool
     public var expandedMicroGroups: [MicroGroup]
     public var metricType: GoalMetricType
+    
+    public var displayedMicros: [Micro]
 }
 
 public extension Settings {
@@ -27,7 +29,8 @@ public extension Settings {
             nutrientsFilter: .all,
             showRDAGoals: true,
             expandedMicroGroups: [],
-            metricType: .consumed
+            metricType: .consumed,
+            displayedMicros: []
         )
     }
     
